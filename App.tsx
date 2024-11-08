@@ -48,11 +48,27 @@ const App = () => {
 
   let timeout: undefined | NodeJS.Timeout;
   useEffect(() => {
+    projectiles.length > 0 && console.log(projectiles);
     timeout && clearTimeout(timeout);
     timeout = setInterval(() => {
       projectiles.forEach((p) => {
         p.x.value += p.velocity.x;
         p.y.value += p.velocity.y;
+      });
+      setProjectiles((oProjectiles) => {
+        const updatedProjectiles = oProjectiles.filter(
+          (p) =>
+            p.x.value >= 0 &&
+            p.x.value < cWidth &&
+            p.y.value >= 0 &&
+            p.y.value < cHeight
+        );
+        // console.log(updatedProjectiles);
+        updatedProjectiles.forEach((p) => {
+          p.x.value += p.velocity.x;
+          p.y.value += p.velocity.y;
+        });
+        return updatedProjectiles;
       });
     }, 16);
     return () => timeout && clearTimeout(timeout);
