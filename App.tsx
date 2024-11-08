@@ -10,7 +10,7 @@ const App = () => {
   const cWidth = Window.width;
   const cHeight = Window.height;
   const [projectiles, setProjectiles] = useState<Projectile[]>([]);
-  const [player, setPlayer] = useState<Player>(
+  const [player] = useState<Player>(
     new Player({
       x: makeMutable(cWidth / 2),
       y: makeMutable(cHeight / 2),
@@ -46,21 +46,39 @@ const App = () => {
     );
   }
 
+  let timeout: undefined | NodeJS.Timeout;
+  useEffect(() => {
+    timeout && clearTimeout(timeout);
+    timeout = setInterval(() => {
+      projectiles.forEach((p) => {
+        p.x.value += p.velocity.x;
+        p.y.value += p.velocity.y;
+      });
+    }, 16);
+    return () => timeout && clearTimeout(timeout);
+  }, [projectiles]);
+
   return (
     <Canvas
       onTouch={(e) => {
         if (e[0][0].type == 2) {
-          const x = makeMutable(e[0][0].x);
-          const y = makeMutable(e[0][0].y);
+          // const x = makeMutable(e[0][0].x);
+          // const y = makeMutable(e[0][0].y);
+          const angle = Math.atan2(
+            e[0][0].y - cHeight / 2,
+            e[0][0].x - cWidth / 2
+          );
+          const x = makeMutable(cWidth / 2);
+          const y = makeMutable(cHeight / 2);
           const newProjectile = new Projectile({
             x,
             y,
             radius: 10,
             color: "blue",
-            velocity: { x: 5, y: 5 },
+            velocity: { x: Math.cos(angle) * 10, y: Math.sin(angle) * 10 },
           });
-          player.x.value = withTiming(e[0][0].x);
-          player.y.value = withTiming(e[0][0].y);
+          // player.x.value = withTiming(e[0][0].x);
+          // player.y.value = withTiming(e[0][0].y);
           setProjectiles((o) => [...o, newProjectile]);
         }
       }}
