@@ -1,37 +1,23 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  BlendMode,
-  Canvas,
-  Circle,
-  createPicture,
-  Group,
-  Picture,
-  Skia,
-  SkiaDomView,
-} from "@shopify/react-native-skia";
+import { Canvas, Circle, SkiaDomView } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
 import { Player } from "./src/Entities/Player";
 import { Projectile } from "./src/Entities/Projectile";
-import {
-  makeMutable,
-  runOnJS,
-  useFrameCallback,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import { makeMutable, withTiming } from "react-native-reanimated";
 const App = () => {
   let canvasRef = useRef<SkiaDomView>(null);
-
   const Window = Dimensions.get("window");
   const cWidth = Window.width;
   const cHeight = Window.height;
-  const projectiles: Projectile[] = [];
-  const player = new Player({
-    x: makeMutable(cWidth / 2),
-    y: makeMutable(cHeight / 2),
-    radius: 30,
-    color: "red",
-  });
+  const [projectiles, setProjectiles] = useState<Projectile[]>([]);
+  const [player, setPlayer] = useState<Player>(
+    new Player({
+      x: makeMutable(cWidth / 2),
+      y: makeMutable(cHeight / 2),
+      radius: 30,
+      color: "red",
+    })
+  );
 
   function drawPlayer() {
     return (
@@ -41,6 +27,22 @@ const App = () => {
         r={player.radius}
         color={player.color}
       />
+    );
+  }
+
+  function drawProjectiles() {
+    return (
+      <>
+        {projectiles.map((projectile, index) => (
+          <Circle
+            key={index}
+            cx={projectile.x}
+            cy={projectile.y}
+            r={projectile.radius}
+            color={projectile.color}
+          />
+        ))}
+      </>
     );
   }
 
@@ -57,17 +59,16 @@ const App = () => {
             color: "blue",
             velocity: { x: 5, y: 5 },
           });
-          console.log("event", e, projectiles);
-
-          projectiles.push(newProjectile);
           player.x.value = withTiming(e[0][0].x);
           player.y.value = withTiming(e[0][0].y);
+          setProjectiles((o) => [...o, newProjectile]);
         }
       }}
       ref={canvasRef}
       style={{ height: cHeight, width: cWidth }}
     >
       {drawPlayer()}
+      {drawProjectiles()}
     </Canvas>
   );
 };
