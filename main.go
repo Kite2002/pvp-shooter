@@ -2,18 +2,49 @@ package main
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
-func main() {
-	rl.InitWindow(800, 450, "Shooter")
-	defer rl.CloseWindow()
+const (
+	SCREEN_WIDTH  = 1000
+	SCREEN_HEIGHT = 800
+)
 
+var (
+	running  = true
+	BG_COLOR = rl.Black
+)
+
+func drawScene() {
+}
+
+func input() {
+
+}
+
+func render() {
+	rl.BeginDrawing()
+
+	rl.ClearBackground(BG_COLOR)
+
+	rl.EndDrawing()
+}
+
+func update() {
+	running = !rl.WindowShouldClose()
+}
+
+func init() {
+	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Shooter")
+	rl.SetExitKey(0)
 	rl.SetTargetFPS(60)
+}
 
-	for !rl.WindowShouldClose() {
-		rl.BeginDrawing()
-
-		rl.ClearBackground(rl.Black)
-		rl.DrawText("First Window :)", 190, 200, 20, rl.LightGray)
-		rl.DrawRectangle(100 , 100 , 100 , 100, rl.Blue)
-		rl.EndDrawing()
+func quit() {
+	rl.CloseWindow()
+}
+func main() {
+	for running {
+		render()
+		input()
+		update()
 	}
+	quit()
 }
