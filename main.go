@@ -1,10 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
+
+type Bullet struct {
+	X        float64 // X position of the bullet
+	Y        float64 // Y position of the bullet
+	Velocity float64 // Speed of the bullet
+	Angle    float64 // Direction of the bullet in radians
+}
 
 const (
 	SCREEN_WIDTH  = 1000
@@ -21,6 +29,7 @@ var (
 	playerDest   rl.Rectangle
 	playerAngle  = 0
 	playerSpeed  = 0.0
+	bullets      []Bullet
 )
 
 func degToRad(degrees float32) float32 {
@@ -45,22 +54,27 @@ func drawScene() {
 }
 
 func input() {
-	println(playerAngle)
 	if rl.IsKeyDown(rl.KeyW) || rl.IsKeyDown(rl.KeyUp) {
 
 		if playerSpeed < 5 {
 			playerSpeed += playerAcc
 		}
 	}
-	// if rl.IsKeyDown(rl.KeyS) || rl.IsKeyDown(rl.KeyDown) {
-	// 	playerDest.X -= playerSpeed * float32(math.Sin(float64(degToRad(float32(playerAngle)))))
-	// 	playerDest.Y -= playerSpeed * float32(-math.Cos(float64(degToRad(float32(playerAngle)))))
-	// }
+
 	if rl.IsKeyDown(rl.KeyA) || rl.IsKeyDown(rl.KeyLeft) {
 		playerAngle -= 5
 	}
 	if rl.IsKeyDown(rl.KeyD) || rl.IsKeyDown(rl.KeyRight) {
 		playerAngle += 5
+	}
+	if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
+		bullets = append(bullets, Bullet{
+			X:        float64(playerDest.X),
+			Y:        float64(playerDest.Y),
+			Velocity: 15,
+			Angle:    float64(playerAngle),
+		})
+		fmt.Printf("bullets: %v\n", bullets)
 	}
 }
 
@@ -85,6 +99,7 @@ func init() {
 	playerSprite = rl.LoadTexture("res/tiny-spaceships/2X/tiny_ship1.png")
 	playerSrc = rl.NewRectangle(0, 0, 44, 48)
 	playerDest = rl.NewRectangle(100, 100, 50, 50)
+	bullets = []Bullet{}
 }
 
 func quit() {
