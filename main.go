@@ -8,10 +8,12 @@ import (
 )
 
 type Bullet struct {
-	X        float64 // X position of the bullet
-	Y        float64 // Y position of the bullet
-	Velocity float64 // Speed of the bullet
-	Angle    float64 // Direction of the bullet in radians
+	X          float32 // X position of the bullet
+	Y          float32 // Y position of the bullet
+	Velocity   float32 // Speed of the bullet
+	Angle      float32 // Direction of the bullet in radians
+	bulletSrc  rl.Rectangle
+	bulletDest rl.Rectangle
 }
 
 const (
@@ -25,11 +27,13 @@ var (
 	BG_COLOR     = rl.Black
 	background   rl.Texture2D
 	playerSprite rl.Texture2D
-	playerSrc    rl.Rectangle
-	playerDest   rl.Rectangle
-	playerAngle  = 0
-	playerSpeed  = 0.0
-	bullets      []Bullet
+	bulletSprite rl.Texture2D
+
+	playerSrc   rl.Rectangle
+	playerDest  rl.Rectangle
+	playerAngle = 0
+	playerSpeed = 0.0
+	bullets     []Bullet
 )
 
 func degToRad(degrees float32) float32 {
@@ -47,9 +51,21 @@ func movePlayer() {
 	}
 }
 
+func updateBullets() {
+	for i := range bullets { // Use index to modify the original slice
+		bullets[i].bulletDest.X += float32(bullets[i].Velocity) * float32(math.Sin(float64(degToRad(float32(bullets[i].Angle)))))
+		bullets[i].bulletDest.Y += float32(bullets[i].Velocity) * float32(-math.Cos(float64(degToRad(float32(bullets[i].Angle)))))
+	}
+}
+
 func drawScene() {
 	rl.DrawTexture(background, 0, 0, rl.NewColor(255, 255, 255, 130))
 	rl.DrawTexturePro(playerSprite, playerSrc, playerDest, rl.NewVector2(playerDest.Width/2, playerDest.Height/2), float32(playerAngle), rl.White)
+	updateBullets()
+	for _, bullet := range bullets {
+		rl.DrawTexturePro(bulletSprite, bullet.bulletSrc, bullet.bulletDest, rl.NewVector2(bullet.bulletDest.Width/2, bullet.bulletDest.Height/2), float32(bullet.Angle-90), rl.White)
+		// rl.Draw(int32(bullet.X), int32(bullet.Y), 5, rl.Blue)
+	}
 	movePlayer()
 }
 
@@ -69,10 +85,12 @@ func input() {
 	}
 	if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
 		bullets = append(bullets, Bullet{
-			X:        float64(playerDest.X),
-			Y:        float64(playerDest.Y),
-			Velocity: 15,
-			Angle:    float64(playerAngle),
+			X:          float32(playerDest.X),
+			Y:          float32(playerDest.Y),
+			Velocity:   12,
+			Angle:      float32(playerAngle),
+			bulletSrc:  rl.NewRectangle(0, 48, 24, 24),
+			bulletDest: rl.NewRectangle(float32(playerDest.X), float32(playerDest.Y), 24, 24),
 		})
 		fmt.Printf("bullets: %v\n", bullets)
 	}
@@ -97,6 +115,7 @@ func init() {
 	rl.SetTargetFPS(60)
 	background = rl.LoadTexture("res/bg/bl.png")
 	playerSprite = rl.LoadTexture("res/tiny-spaceships/2X/tiny_ship1.png")
+	bulletSprite = rl.LoadTexture("res/projectiles/bullets.png")
 	playerSrc = rl.NewRectangle(0, 0, 44, 48)
 	playerDest = rl.NewRectangle(100, 100, 50, 50)
 	bullets = []Bullet{}
