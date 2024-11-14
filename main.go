@@ -52,7 +52,21 @@ func movePlayer() {
 }
 
 func updateBullets() {
-	for i := range bullets { // Use index to modify the original slice
+	// Filter bullets to remove those that are out of the screen bounds
+	activeBullets := bullets[:0] // Use the same underlying array to avoid allocations
+	for _, bullet := range bullets {
+		// Check if the bullet is within the screen bounds
+		if bullet.bulletDest.X >= 0 && bullet.bulletDest.X <= SCREEN_WIDTH &&
+			bullet.bulletDest.Y >= 0 && bullet.bulletDest.Y <= SCREEN_HEIGHT {
+			activeBullets = append(activeBullets, bullet)
+		}
+	}
+	fmt.Printf("bullets: %v\n", bullets)
+	// Update the global bullets slice to only include active bullets
+	bullets = activeBullets
+
+	// Update the position of each bullet
+	for i := range bullets {
 		bullets[i].bulletDest.X += float32(bullets[i].Velocity) * float32(math.Sin(float64(degToRad(float32(bullets[i].Angle)))))
 		bullets[i].bulletDest.Y += float32(bullets[i].Velocity) * float32(-math.Cos(float64(degToRad(float32(bullets[i].Angle)))))
 	}
@@ -87,7 +101,7 @@ func input() {
 		bullets = append(bullets, Bullet{
 			X:          float32(playerDest.X),
 			Y:          float32(playerDest.Y),
-			Velocity:   12,
+			Velocity:   10,
 			Angle:      float32(playerAngle),
 			bulletSrc:  rl.NewRectangle(0, 48, 24, 24),
 			bulletDest: rl.NewRectangle(float32(playerDest.X), float32(playerDest.Y), 24, 24),
